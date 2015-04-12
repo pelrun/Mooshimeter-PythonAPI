@@ -314,8 +314,8 @@ class Mooshimeter(object):
         self.disp_depth_auto = True
         self.offsets         = [0,0]
     def connect(self):
-        self.p.connect()
         self.p.discover()
+        self.p.connect()
         def assignHandleAndRead(c):
             self.p.replaceCharacteristic(c)
             c.read()

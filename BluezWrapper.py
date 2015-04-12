@@ -1,5 +1,6 @@
 import time
-from subprocess import Popen;
+import subprocess
+import re
 
 import gobject
 import dbus
@@ -76,12 +77,12 @@ class Peripheral(object):
         :param args: args passed to ble_evt_gap_scan_response
         :return:
         """
-        self.sender = args['Address']
+        self.sender = str(args['Address'])
         if 'RSSI' in args:
             self.rssi = args['RSSI']
         else:
-            self.rssi = None
-        self.conn_handle = -1
+            self.rssi = -200
+        self.conn_handle = None
         self.chars = {} #(handle,Characteristic)
         self.ad_services = [UUID(str(s)) for s in args['UUIDs']]
 
@@ -100,11 +101,8 @@ class Peripheral(object):
     def connect(self):
         if not self.conn_handle:
             self.conn_handle = GATTRequester(self.sender)
-        if not self.conn_handle.is_connected():
-            self.conn_handle.connect()
     def disconnect(self):
-        if self.conn_handle.is_connected():
-            self.conn_handle.disconnect()
+        pass
     def discover(self):
         groups = discoverServiceGroups(address=self.sender)
         print("Service Groups:")
@@ -225,28 +223,27 @@ def scan(duration,stop_after=0):
     return [Peripheral(device) for device in results.values()]
 
 def discoverServiceGroups(address = None, conn = None):
-    service_groups = []
+    groups = []
     if address:
         p = subprocess.Popen(['gatttool','-b',address,'--primary'], stdout=subprocess.PIPE)
         for line in p.stdout.readlines():
             match = re.search(r'attr handle.*?(0x[0-9a-fA-F]+).*?end grp handle.*?(0x[0-9a-fA-F]+).*?uuid.*?([-0-9a-fA-F]+)', line)
             if match:
-                service_groups.append({'start': match.group(1), 'end': match.group(2), 'uuid': match.group(3) })
+                groups.append({'start': int(match.group(1),0), 'end': int(match.group(2),0), 'uuid': match.group(3) })
     else:
         print("discoverServiceGroups doesn't support connection handles yet")
-    return service_groups
+    return groups
 
 def discoverCharacteristics(address = None, conn = None, handle_start = 0, handle_end = 0xFFFF):
     chars = []
     if address:
-        p = subprocess.Popen(['gatttool','-b',address,'--characteristics','-s',handle_start,'-e',handle_end], stdout=subprocess.PIPE)
+        p = subprocess.Popen(['gatttool','-b',address,'--characteristics','-s',str(handle_start),'-e',str(handle_end)], stdout=subprocess.PIPE)
         for line in p.stdout.readlines():
             match = re.search(r'handle.*?(0x[0-9a-fA-F]+).*?char properties.*?(0x[0-9a-fA-F]+).*?char value handle.*?(0x[0-9a-fA-F]+).*?uuid.*?([-0-9a-fA-F]+)', line)
             if match:
-                service_groups.append({'handle': match.group(1), 'prop': match.group(2), 'chrhandle': match.group(3), 'uuid': match.group(4) })
+                chars.append({'handle': int(match.group(1),0), 'prop': int(match.group(2),0), 'chrhandle': int(match.group(3),0), 'uuid': match.group(4) })
     else:
         print("discoverCharacteristics doesn't support connection handles yet")
-            
     return chars
 
 def read(conn, handle):
