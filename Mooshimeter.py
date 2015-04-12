@@ -1,5 +1,5 @@
 # coding=UTF-8
-import BGWrapper
+import BluezWrapper as Bluetooth
 import struct
 from UUID import *
 
@@ -46,7 +46,7 @@ class BytePack:
             self.i += 4
             return r[0]
 
-class MeterSettings(BGWrapper.Characteristic):
+class MeterSettings(Bluetooth.Characteristic):
     METER_SHUTDOWN  = 0
     METER_STANDBY   = 1
     METER_PAUSED    = 2
@@ -70,7 +70,7 @@ class MeterSettings(BGWrapper.Characteristic):
 
     def __init__(self, parent, handle, uuid):
         """
-        :param other: a BGWrapper.Characteristic
+        :param other: a Bluetooth.Characteristic
         :return:
         """
         super(MeterSettings,self).__init__(parent, handle, uuid)
@@ -156,10 +156,10 @@ class MeterSettings(BGWrapper.Characteristic):
         :return:
         """
         self.chset[ch] &=~self.METER_CH_SETTINGS_INPUT_MASK
-class MeterLogSettings(BGWrapper.Characteristic):
+class MeterLogSettings(Bluetooth.Characteristic):
     def __init__(self, parent, handle, uuid):
         """
-        :param other: a BGWrapper.Characteristic
+        :param other: a Bluetooth.Characteristic
         :return:
         """
         super(MeterLogSettings,self).__init__(parent, handle, uuid)
@@ -192,10 +192,10 @@ class MeterLogSettings(BGWrapper.Characteristic):
         self.target_logging_state    = b.get( )
         self.logging_period_ms       = b.get(2)
         self.logging_n_cycles        = b.get( )
-class MeterInfo(BGWrapper.Characteristic):
+class MeterInfo(Bluetooth.Characteristic):
     def __init__(self, parent, handle, uuid):
         """
-        :param other: a BGWrapper.Characteristic
+        :param other: a Bluetooth.Characteristic
         :return:
         """
         super(MeterInfo,self).__init__(parent, handle, uuid)
@@ -216,10 +216,10 @@ class MeterInfo(BGWrapper.Characteristic):
         self.assembly_variant = b.get(1)
         self.lot_number       = b.get(2)
         self.build_time       = b.get(4)
-class MeterSample(BGWrapper.Characteristic):
+class MeterSample(Bluetooth.Characteristic):
     def __init__(self, parent, handle, uuid):
         """
-        :param other: a BGWrapper.Characteristic
+        :param other: a Bluetooth.Characteristic
         :return:
         """
         super(MeterSample,self).__init__(parent, handle, uuid)
@@ -238,10 +238,10 @@ class MeterSample(BGWrapper.Characteristic):
         self.reading_lsb[1] = b.get(3,signed=True)
         self.reading_ms[0]  = b.get(t=float)
         self.reading_ms[1]  = b.get(t=float)
-class MeterName(BGWrapper.Characteristic):
+class MeterName(Bluetooth.Characteristic):
         def __init__(self, parent, handle, uuid):
             """
-            :param other: a BGWrapper.Characteristic
+            :param other: a Bluetooth.Characteristic
             :return:
             """
             super(MeterName,self).__init__(parent, handle, uuid)
@@ -296,7 +296,7 @@ class Mooshimeter(object):
     def __init__(self, peripheral):
         """
         Initialized instance variables
-        :param peripheral: a BGWrapper.Peripheral instance
+        :param peripheral: a Bluetooth.Peripheral instance
         :return:
         """
         self.p = peripheral

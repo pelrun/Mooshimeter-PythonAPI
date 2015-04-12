@@ -1,11 +1,11 @@
-import BGWrapper
+import BluezWrapper as Bluetooth
 from Mooshimeter import Mooshimeter
 
 from operator import attrgetter
 
 """
 Example.py
-This script is meant to demonstrate use of the Mooshimeter and BGWrapper classes.
+This script is meant to demonstrate use of the Mooshimeter and Bluetooth classes.
 The script does the following:
 - Scan for BLE devices
 - Filter for Mooshimeters
@@ -17,9 +17,9 @@ The script does the following:
 if __name__=="__main__":
     # Set up the lower level to talk to a BLED112 in port COM4
     # REPLACE THIS WITH THE BLED112 PORT ON YOUR SYSTEM
-    BGWrapper.initialize("COM4")
+    Bluetooth.initialize()
     # Scan for 3 seconds
-    scan_results = BGWrapper.scan(3)
+    scan_results = Bluetooth.scan(3)
     # Filter for devices advertising the Mooshimeter service
     meters = filter(lambda(p):Mooshimeter.mUUID.METER_SERVICE in p.ad_services, scan_results)
     if len(meters) == 0:
@@ -57,4 +57,4 @@ if __name__=="__main__":
     connectToMeterAndStream(meters[0])
     while True:
         # This call checks the serial port and processes new data
-        BGWrapper.idle()
+        Bluetooth.idle()
